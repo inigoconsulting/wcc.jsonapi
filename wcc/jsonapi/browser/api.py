@@ -4,6 +4,7 @@ from Products.CMFCore.interfaces import ISiteRoot
 import Acquisition
 from Products.ATContentTypes.interfaces.news import IATNewsItem
 import json
+from plone.uuid.interfaces import IUUID
 
 class APIRoot(Acquisition.Implicit, grok.MultiAdapter):
     grok.adapts(ISiteRoot, IRequest)
@@ -47,15 +48,25 @@ class News(V10JSON):
         for brain in brains[:20]:
             obj = brain.getObject()
             item = {
+                'uuid': IUUID(obj),
                 'title': brain.Title,
                 'description': brain.Description,
                 'images': {},
                 'date': brain.Date,
-                'text': obj.getText()
+                'text': obj.getText(),
+                'image_caption': obj.getField('imageCaption').get(obj),
+                'state': brain.review_state
             }
+
+            if getattr(brain.modified, 'isoformat', None):
+                item['modified'] = brain.modified.isoformat()
+            else:
+                item['modified'] = brain.modified.ISO8601()
             if obj.getField('image').get(obj):
                 scales = obj.unrestrictedTraverse('@@images')
                 item['images']['mini'] = scales.scale('image',
                         scale='mini').url
+                item['images']['large'] = scales.scale('image',
+                        scale='large').url
             result.append(item)
         return result
