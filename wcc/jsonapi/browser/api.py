@@ -5,6 +5,9 @@ import Acquisition
 from Products.ATContentTypes.interfaces.news import IATNewsItem
 import json
 from plone.uuid.interfaces import IUUID
+from AccessControl import Unauthorized
+from wcc.jsonapi.interfaces import ISignatureService
+from zope.component import getUtility
 
 class APIRoot(Acquisition.Implicit, grok.MultiAdapter):
     grok.adapts(ISiteRoot, IRequest)
@@ -27,8 +30,12 @@ class V10JSON(grok.View):
     grok.context(V10)
 
     def render(self):
-        self.request.response.setHeader('Content-Type','application/json')
-        return json.dumps(self.json(),indent=4)
+        url = self.request.getURL()
+        ss = ISignatureService(self.context)
+        if ss.validate_params(url, self.request.form):
+            self.request.response.setHeader('Content-Type','application/json')
+            return json.dumps(self.json(),indent=4)
+        raise Unauthorized('Unauthorized')
 
 class News(V10JSON):
     def json(self):
