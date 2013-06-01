@@ -62,7 +62,8 @@ class ActivityCollection(AdapterContext):
     def __getattr__(self, uuid):
         site = getSite()
         brains = site.portal_catalog(UID=uuid,
-                        portal_type='wcc.activity.activity')
+                        portal_type='wcc.activity.activity',
+                        Language='all')
         if not brains:
             raise AttributeError(uuid)
         return Activity(brains[0].getObject())
@@ -76,7 +77,7 @@ class ActivityNewsCollection(AdapterContext):
 
     def query(self):
         activity_uuid = IUUID(aq_parent(self).obj)
-        brains = self.portal_catalog(UID=activity_uuid)
+        brains = self.portal_catalog(UID=activity_uuid, Language='all')
         if not brains:
             return []
 
