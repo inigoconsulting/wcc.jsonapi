@@ -50,7 +50,11 @@ class ActivityCollection(AdapterContext):
     grok.name('activities')
 
     def query(self):
-        brains = self.portal_catalog(portal_type='wcc.activity.activity')
+        language = self.request.get('language', 'all')
+        brains = self.portal_catalog(
+                portal_type='wcc.activity.activity',
+                Language=language
+        )
         result = []
         for brain in brains:
             obj = brain.getObject()
@@ -76,12 +80,7 @@ class ActivityNewsCollection(AdapterContext):
     grok.name('news')
 
     def query(self):
-        activity_uuid = IUUID(aq_parent(self).obj)
-        brains = self.portal_catalog(UID=activity_uuid, Language='all')
-        if not brains:
-            return []
-
-        rels = IActivityRelation(brains[0].getObject())
+        rels = IActivityRelation(aq_parent(self).obj)
 
         limit = int(self.request.get('limit', 20))
 
