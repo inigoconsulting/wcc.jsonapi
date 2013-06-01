@@ -61,7 +61,8 @@ class ActivityCollection(AdapterContext):
 
     def __getattr__(self, uuid):
         site = getSite()
-        brains = site.portal_catalog(UID=uuid)
+        brains = site.portal_catalog(UID=uuid,
+                        portal_type='wcc.activity.activity')
         if not brains:
             raise AttributeError(uuid)
         return Activity(brains[0].getObject())
@@ -83,7 +84,18 @@ class ActivityNewsCollection(AdapterContext):
 
         limit = int(self.request.get('limit', 20))
 
-        return [IJsonProvider(o).to_dict() for o in rels.related_news()[:limit]]
+        def _should_include(obj):
+            category = self.request.get('category', '')
+            if not category:
+                return True
+            for subject in o.Subject():
+                if subject.lower().strip() == category.lower().strip():
+                    return True
+            return False
+
+        return [IJsonProvider(o).to_dict() for o in (
+            rels.related_news()[:limit]) if _should_include(o)]
+
 
 class NewsCollection(AdapterContext):
 

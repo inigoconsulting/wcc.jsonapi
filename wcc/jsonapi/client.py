@@ -83,13 +83,16 @@ class V10APIClient(object):
         return out
 
 
-    def activity_news(self, activity, limit=20):
+    def activity_news(self, activity, category=None, limit=20):
         api_url = '%s/1.0/activities/%s/news' % (self.endpoint, activity)
         ss = ISignatureService(self.context)
 
         params = {}
         if limit is not None:
             params['limit'] = limit
+
+        if category is not None:
+            params['category'] = category
 
         params = ss.sign_params(api_url, params)
         resp = requests.get(api_url, params=params)
