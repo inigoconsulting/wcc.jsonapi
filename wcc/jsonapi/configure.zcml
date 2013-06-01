@@ -13,6 +13,8 @@
     <grok:grok package="." />
     <i18n:registerTranslations directory="locales" />
 
+    <browser:defaultView for=".content.api.Context" name="index"/>
+
     <include package=".behavior"/>
     <include package=".portlet"/>
 

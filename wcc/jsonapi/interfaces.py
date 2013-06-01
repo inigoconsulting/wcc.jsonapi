@@ -10,3 +10,25 @@ class ISignatureService(Interface):
 
     def verify_param(url, param):
         pass
+
+
+class IAPIClient(Interface):
+
+    def news(language, category):
+        pass
+
+
+    def activity_news(language, category):
+        pass
+
+    def activities(language, category):
+        pass
+
+class IJsonProvider(Interface):
+
+    def to_dict():
+        pass
+
+    def json():
+        pass
+
