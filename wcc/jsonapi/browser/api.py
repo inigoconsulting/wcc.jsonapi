@@ -25,7 +25,7 @@ class V10JSON(grok.View):
             self.request.response.setHeader('Content-Type','application/json')
             return json.dumps({
                 'error': '403',
-                'error-messagee': 'Unauthorized'
+                'error-message': 'Unauthorized'
             })
 
         self.request.response.setHeader('Content-Type','application/json')

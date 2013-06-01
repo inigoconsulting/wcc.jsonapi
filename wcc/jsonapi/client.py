@@ -67,6 +67,22 @@ class V10APIClient(object):
 
         return out
 
+    def translation(self, content):
+        api_url = '%s/1.0/translations/%s' % (self.endpoint, content)
+        ss = ISignatureService(self.context)
+        params = ss.sign_params(api_url, {})
+        resp = requests.get(api_url, params=params)
+        out = resp.json()
+
+        if 'error' in out:
+            raise APIQueryError('%s : %s' % (
+                out['error'],
+                out['error-message']
+            ))
+
+        return out
+
+
     def activity(self, activity):
         api_url = '%s/1.0/activities/%s' % (self.endpoint, activity)
         ss = ISignatureService(self.context)

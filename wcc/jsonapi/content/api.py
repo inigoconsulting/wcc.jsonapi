@@ -8,6 +8,7 @@ from wcc.jsonapi.interfaces import ISignatureService, IJsonProvider
 from wcc.activity.interfaces import IActivityRelation
 from plone.uuid.interfaces import IUUID
 from Acquisition import aq_parent
+from plone.multilingual.interfaces import ITranslationManager
 
 class Context(Acquisition.Implicit):
     pass
@@ -42,6 +43,35 @@ class V10(AdapterContext):
     grok.adapts(APIRoot, IRequest)
     grok.name('1.0')
 
+
+class TranslationCollection(AdapterContext):
+    grok.adapts(V10, IRequest)
+    grok.name('translations')
+
+    # http://site/api/1.0/translations
+    
+    def query(self):
+        return {}
+
+    def __getattr__(self, uuid):
+        site = getSite()
+        brains = site.portal_catalog(UID=uuid, Language='all')
+        if not brains:
+            raise AttributeError(uuid)
+
+        obj = brains[0].getObject()
+        return Translation(ITranslationManager(obj))
+
+class Translation(ContentContext):
+
+    # http://site/api/1.0/translations/<uuid>
+
+    def query(self):
+        result = {}
+        for lang, obj in self.obj.get_translations().items():
+            result[lang] = IUUID(obj)
+        return result
+
 class ActivityCollection(AdapterContext):
 
     # http://site/api/1.0/activities
@@ -73,6 +103,7 @@ class ActivityCollection(AdapterContext):
         return Activity(brains[0].getObject())
 
 class Activity(ContentContext):
+    # http://site/api/1.0/activities/<uuid>
     pass
 
 class ActivityNewsCollection(AdapterContext):
