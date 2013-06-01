@@ -33,6 +33,8 @@ setup(name='wcc.jsonapi',
           'collective.dexteritytextindexer',
           'plone.app.multilingual',
           'plone.multilingualbehavior',
+          'wcc.activity',
+          'requests',
           # -*- Extra requirements: -*-
       ],
       extras_require={

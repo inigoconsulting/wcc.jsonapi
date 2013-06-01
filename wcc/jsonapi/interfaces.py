@@ -31,4 +31,3 @@ class IJsonProvider(Interface):
 
     def json():
         pass
-
