@@ -9,6 +9,7 @@ from wcc.activity.interfaces import IActivityRelation
 from plone.uuid.interfaces import IUUID
 from Acquisition import aq_parent
 from plone.multilingual.interfaces import ITranslationManager
+from Products.ATContentTypes.interfaces.news import IATNewsItem
 
 class Context(Acquisition.Implicit):
     pass
@@ -69,7 +70,8 @@ class Translation(ContentContext):
     def query(self):
         result = {}
         for lang, obj in self.obj.get_translations().items():
-            result[lang] = IUUID(obj)
+            if obj:
+                result[lang] = IUUID(obj)
         return result
 
 class ActivityCollection(AdapterContext):
