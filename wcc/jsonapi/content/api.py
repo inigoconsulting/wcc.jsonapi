@@ -6,10 +6,16 @@ from zope.component.hooks import getSite
 from zope.interface import Interface
 from wcc.jsonapi.interfaces import ISignatureService, IJsonProvider
 from wcc.activity.interfaces import IActivityRelation
+from wcc.document.content.document import IDocument
 from plone.uuid.interfaces import IUUID
 from Acquisition import aq_parent
 from plone.multilingual.interfaces import ITranslationManager
 from Products.ATContentTypes.interfaces.news import IATNewsItem
+from AccessControl import Unauthorized
+from plone.dexterity.utils import createContentInContainer
+from zope.container.interfaces import INameChooser
+from Products.CMFPlone.utils import _createObjectByType
+import plone.api as ploneapi
 
 class Context(Acquisition.Implicit):
     pass
@@ -163,3 +169,74 @@ class NewsCollection(AdapterContext):
 
         return result
 
+class DocumentCollection(AdapterContext):
+    
+    # http://site/api/1.0/documents
+
+    grok.adapts(V10, IRequest)
+    grok.name('documents')
+
+    def query(self):
+
+        params = {
+            'object_provides': IDocument.__identifier__,
+            'sort_on': 'Date',
+            'sort_order':'descending',
+            'Language': 'all'
+        }
+        objs = [
+            brain.getObject() for brain in self.portal_catalog(
+                **params
+            )
+        ]
+
+        result = []
+
+        limit = int(self.request.get('limit', 20))
+
+        for obj in objs[:limit]:
+            item = IJsonProvider(obj).to_dict()
+            result.append(item)
+
+        return result
+
+    def __getattr__(self, uuid):
+        site = getSite()
+        brains = site.portal_catalog(UID=uuid,
+                        portal_type='wcc.activity.document',
+                        Language='all')
+        if not brains:
+            raise AttributeError(uuid)
+        return Activity(brains[0].getObject())
+
+class Document(ContentContext):
+    # http://site/api/1.0/documents/<uuid>
+    pass
+
+
+class DocumentCreate(AdapterContext):
+
+    grok.adapts(DocumentCollection, IRequest)
+    grok.name('create')
+
+    def query(self):
+
+        params = {
+            'title': self.request.get('title'),
+            'description': self.request.get('description'),
+        }
+        path = self.request.get('parent_path')
+        site = getSite()
+
+        with ploneapi.env.adopt_roles(['Manager']):
+            dest = site.restrictedTraverse(path)
+            item = createContentInContainer(dest, 'wcc.document.document',
+                title=params['title'])
+            item.setTitle(params['title'])
+            item.setDescription(params['description'])
+            item.reindexObject()
+
+        return {
+            'uuid': IUUID(item),
+            'url': item.absolute_url()
+        }

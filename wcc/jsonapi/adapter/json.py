@@ -4,6 +4,7 @@ from plone.uuid.interfaces import IUUID
 from Products.CMFCore.interfaces import IDublinCore
 from plone.dexterity.interfaces import IDexterityContent
 from wcc.activity.content.activity import IActivity
+from wcc.document.content.document import IDocument
 from Products.ATContentTypes.interfaces.news import IATNewsItem
 
 class BaseJsonProvider(grok.Adapter):
@@ -75,4 +76,13 @@ class NewsJsonProvider(BaseJsonProvider):
         if large:
             item['image']['large'] = large.url
 
+        return item
+
+
+class DocumentJsonProvider(BaseJsonProvider):
+    grok.context(IDocument)
+
+    def to_dict(self):
+        item = super(DocumentJsonProvider, self).to_dict()
+        obj = self.context 
         return item

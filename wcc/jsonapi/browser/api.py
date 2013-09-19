@@ -35,4 +35,11 @@ class V10JSON(grok.View):
                 'error': '404',
                 'error-message': 'Not Found'
             })
-        return json.dumps(self.context.query(),indent=4)
+
+        try:
+            return json.dumps(self.context.query(),indent=4)
+        except Unauthorized:
+            return json.dumps({
+                'error': '403',
+                'error-message': 'Unauthorized'
+            })
