@@ -1,6 +1,7 @@
 from five import grok
 import hashlib
 from datetime import datetime
+from DateTime import DateTime
 from dateutil.parser import parse as parse_dt
 import copy
 import os
@@ -46,7 +47,7 @@ class SignatureService(grok.Adapter):
             return False
 
         timestamp_dt = parse_dt(timestamp)
-        delta = datetime.utcnow() - timestamp_dt
+        delta = datetime.utcnow() - DateTime(timestamp_dt).utcdatetime()
         if delta.seconds > tolerance:
             return False
     
