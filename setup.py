@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '1.6b3'
+version = '1.6b4.dev0'
 
 setup(name='wcc.jsonapi',
       version=version,
