@@ -27,7 +27,7 @@ class SignatureService(grok.Adapter):
         if 'auth_sig' in params:
             del params['auth_sig']
 
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = '%sGMT+0' % datetime.utcnow().isoformat()
         params['timestamp'] = timestamp
         key_values = sorted(params.items(), key=lambda x:x[0])
         qs = urllib.urlencode(key_values)
